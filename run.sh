@@ -11,7 +11,6 @@ docker run \
     --detach \
     --name test-runner \
     --network https \
-    --publish 8080:8080 \
     --env REGISTRY_PASSWORD \
     --restart unless-stopped \
     --volume /var/run/docker.sock:/var/run/docker.sock:ro \
