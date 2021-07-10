@@ -1,4 +1,4 @@
-module github.com/01-edu/test-runner
+module main
 
 go 1.16
 
