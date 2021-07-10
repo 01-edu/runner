@@ -217,6 +217,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	logDuration("container copy")
 
 	// Create the test container with security contraints
+	maxPID := int64(256)
 	hostconfig := container.HostConfig{
 		LogConfig: container.LogConfig{
 			Type: "json-file",
@@ -227,8 +228,9 @@ func runTest(r *http.Request) ([]byte, error) {
 		},
 		ReadonlyRootfs: true,
 		Resources: container.Resources{
-			Memory:   500e6,
-			NanoCPUs: 2e9,
+			PidsLimit: &maxPID,
+			Memory:    500e6,
+			NanoCPUs:  2e9,
 		},
 		NetworkMode: "none",
 		Tmpfs:       map[string]string{"/jail": "size=100M,noatime,exec,nodev,nosuid,uid=1000,gid=1000,nr_inodes=5k,mode=1700"},
