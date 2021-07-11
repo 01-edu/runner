@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -326,8 +327,10 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", handle)
+	port := flag.String("port", "8080", "listening port")
+	flag.Parse()
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         ":" + *port,
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
