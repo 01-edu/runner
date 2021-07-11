@@ -115,7 +115,6 @@ func runTest(r *http.Request) ([]byte, error) {
 		}
 	}
 	for _, file := range zipReader.File {
-		// ZIP Slip ?
 		var isFile bool
 		if file.FileInfo().IsDir() {
 		} else if file.Mode().IsRegular() {
