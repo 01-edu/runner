@@ -23,7 +23,7 @@ Where `REGISTRY_PASSWORD` is the password of our private Docker [registry](https
 
 ### Example
 
-```
+```console
 $ go run . &
 $ echo mydata > myfile
 $ zip archive.zip myfile
