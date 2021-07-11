@@ -15,11 +15,24 @@ Where `REGISTRY_PASSWORD` is the password of our private Docker [registry](https
 
 ## Usage
 
-- URL path: the Docker image to use (will be pulled if needed)
-- URL query:
-  - `env`: environment variables
-  - `args`: command-line arguments
+### Input
+
+- URL
+  - Path: the Docker image to use (will be pulled if needed)
+  - Query
+    - `env`: environment variables
+    - `args`: command-line arguments
 - Body: a ZIP archive
+
+### Output
+
+- Status:
+  - `200 OK`: the test has been executed
+  - `400 Bad Request`: the test has not been executed
+- Body:
+  - JSON object
+    - `Output`: string containing the output of the test
+    - `Ok`: boolean indicating the exit status of the test
 
 ### Example
 
