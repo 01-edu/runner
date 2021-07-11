@@ -151,12 +151,8 @@ func runTest(r *http.Request) ([]byte, error) {
 	logDuration("zip to tar")
 
 	// Pull Docker image if needed
-	var needsUpdate bool
 	updates.Lock()
 	if time.Since(updates.m[image]) > time.Minute {
-		needsUpdate = true
-	}
-	if needsUpdate {
 		var options types.ImagePullOptions
 		if strings.HasPrefix(image, "docker.01-edu.org/") {
 			b, err := json.Marshal(types.AuthConfig{
