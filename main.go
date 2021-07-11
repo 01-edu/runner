@@ -100,7 +100,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	defer tarWriter.Close()
 	logDuration("read all")
 	var prefix string
-	{ // Find the single parent folder if it exists
+	{ // Find the unique parent folder if it exists (in order to remove it later)
 		rootPaths := map[string]struct{}{}
 		for _, file := range zipReader.File {
 			if file.FileInfo().IsDir() {
