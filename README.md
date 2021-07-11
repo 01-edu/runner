@@ -31,8 +31,8 @@ Where `REGISTRY_PASSWORD` is the password of our private Docker [registry](https
   - `400 Bad Request`: the test has not been executed
 - Body:
   - JSON object
-    - `Output`: string containing the output of the test
-    - `Ok`: boolean indicating the exit status of the test
+    - `Output`: string containing the output of the test or the error executing the test
+    - `Ok`: boolean set to `true` if the exit status of the test is zero (success)
 
 ### Example
 
