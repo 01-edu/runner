@@ -73,7 +73,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	ids.Unlock()
 	defer logDuration(remote)("total")
 	logDuration := logDuration(remote)
-	image := r.URL.Path[1:] // remove leading '/'
+	image := strings.Trim(r.URL.Path, "/")
 	query := r.URL.Query()
 	env := query["env"]
 	args := query["args"]
