@@ -150,7 +150,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	}
 	logDuration("zip to tar")
 
-	// Pull Docker image if needed
+	// Refresh Docker image every minute
 	updates.Lock()
 	if time.Since(updates.m[image]) > time.Minute {
 		var options types.ImagePullOptions
