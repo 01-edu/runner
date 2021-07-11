@@ -37,27 +37,19 @@ Where `REGISTRY_PASSWORD` is the password of our private Docker [registry](https
 ### Example
 
 ```console
-$ go run . &
+$ go run . 2>/dev/null &
 $ echo mydata > myfile
 $ zip archive.zip myfile
-$ curl --silent --data-binary @archive.zip 'localhost:8080/alpine?args=sh&args=-c&args=cat+student/myfile' | jq -r .Output
-2021/07/11 16:30:26  [::1]#1  0.000s  read all
-2021/07/11 16:30:26  [::1]#1  0.000s  zip to tar
-2021/07/11 16:30:26  [::1]#1  0.010s  image pull
-2021/07/11 16:30:26  [::1]#1  0.119s  container creation
-2021/07/11 16:30:26  [::1]#1  0.184s  container remove
-2021/07/11 16:30:26  [::1]#1  0.000s  container copy
-2021/07/11 16:30:26  [::1]#1  0.104s  container creation
-2021/07/11 16:30:26  [::1]#1  0.503s  container start
-2021/07/11 16:30:27  [::1]#1  0.088s  container stop
-2021/07/11 16:30:27  [::1]#1  0.007s  container logs
-2021/07/11 16:30:27  [::1]#1  0.062s  container remove
-2021/07/11 16:30:27  [::1]#1  0.012s  volume remove
-2021/07/11 16:30:27  [::1]#1  1.089s  total
+$ curl --silent --data-binary @archive.zip 'localhost:8080/alpine?args=sh&args=-c&args=cat+student/myfile' | jq -jr .Output
 mydata
-
 $ kill %1
 ```
+
+## Test environment
+
+- Network is not reachable
+- ZIP data is extracted in `/jail/student` (read-only)
+- `/jail` is the only writable directory
 
 ## TODO
 

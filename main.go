@@ -172,7 +172,7 @@ func runTest(r *http.Request) ([]byte, error) {
 			return nil, err
 		}
 		b = bytes.ReplaceAll(b, []byte{'\r', '\n'}, []byte{'\n'})
-		os.Stdout.Write(b)
+		os.Stderr.Write(b)
 		updates.m[image] = time.Now()
 	}
 	updates.Unlock()
