@@ -56,9 +56,14 @@ func logDuration(remote string) func(event string) {
 }
 
 var ids = struct {
-	sync.RWMutex
+	sync.Mutex
 	m map[string]int
 }{m: map[string]int{}}
+
+var updates = struct {
+	sync.Mutex
+	m map[string]time.Time
+}{m: map[string]time.Time{}}
 
 func runTest(r *http.Request) ([]byte, error) {
 	// Parse URL path, query
@@ -146,8 +151,13 @@ func runTest(r *http.Request) ([]byte, error) {
 	}
 	logDuration("zip to tar")
 
-	// Pull Docker image if not already present
-	if _, _, err := cli.ImageInspectWithRaw(ctx, image); err != nil {
+	// Pull Docker image if needed
+	var needsUpdate bool
+	updates.Lock()
+	if time.Since(updates.m[image]) > time.Minute {
+		needsUpdate = true
+	}
+	if needsUpdate {
 		var options types.ImagePullOptions
 		if strings.HasPrefix(image, "docker.01-edu.org/") {
 			b, err := json.Marshal(types.AuthConfig{
@@ -168,8 +178,10 @@ func runTest(r *http.Request) ([]byte, error) {
 		}
 		b = bytes.ReplaceAll(b, []byte{'\r', '\n'}, []byte{'\n'})
 		os.Stdout.Write(b)
+		updates.m[image] = time.Now()
 	}
-	logDuration("image pull")
+	updates.Unlock()
+	logDuration("image pulled: " + image)
 
 	// Create the volume that will contain the code to test
 	volume, err := cli.VolumeCreate(ctx, volume.VolumeCreateBody{Labels: labels})
