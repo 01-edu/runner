@@ -285,7 +285,7 @@ func runTest(r *http.Request) ([]byte, error) {
 			}
 		}
 		containerRemove(resp.ID)
-		return nil, err
+		return nil, errors.New("timeout: did you write an infinite loop?")
 	case status := <-statusCh:
 		ok = status.StatusCode == 0
 		if !ok && status.Error != nil {
