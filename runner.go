@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"archive/tar"
@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -65,7 +64,7 @@ var updates = struct {
 	m map[string]time.Time
 }{m: map[string]time.Time{}}
 
-func runTest(r *http.Request) ([]byte, error) {
+func RunTest(r *http.Request) ([]byte, bool, error) {
 	// Parse URL path, query
 	remote := strings.Split(r.Header.Get("X-Forwarded-For"), ", ")[0]
 	if remote == "" {
@@ -88,12 +87,12 @@ func runTest(r *http.Request) ([]byte, error) {
 	r.Body = http.MaxBytesReader(nil, r.Body, http.DefaultMaxHeaderBytes)
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, errors.New(err.Error() + ": is your repository too large?")
+		return nil, false, errors.New(err.Error() + ": is your repository too large?")
 	}
 	bodyReader := bytes.NewReader(b)
 	zipReader, err := zip.NewReader(bodyReader, bodyReader.Size())
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	var tarBuffer bytes.Buffer
 	tarWriter := tar.NewWriter(&tarBuffer)
@@ -133,17 +132,17 @@ func runTest(r *http.Request) ([]byte, error) {
 			h.Size = file.FileInfo().Size()
 		}
 		if err := tarWriter.WriteHeader(h); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		if isFile {
 			fileData, err := file.Open()
 			if err != nil {
-				return nil, err
+				return nil, false, err
 			}
 			_, err = io.Copy(tarWriter, fileData)
 			if err != nil {
 				fileData.Close()
-				return nil, err
+				return nil, false, err
 			}
 			fileData.Close()
 		}
@@ -181,7 +180,7 @@ func runTest(r *http.Request) ([]byte, error) {
 			if _, _, err = cli.ImageInspectWithRaw(ctx, image); err != nil {
 				// The image doesn't exist
 				updates.Unlock()
-				return nil, err
+				return nil, false, err
 			}
 			// Pulling the image has failed but an old revision already exists
 		}
@@ -193,7 +192,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	// Create the volume that will contain the code to test
 	volume, err := cli.VolumeCreate(ctx, volume.VolumeCreateBody{Labels: labels})
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	logError := func(event string, err error) {
@@ -223,7 +222,7 @@ func runTest(r *http.Request) ([]byte, error) {
 		Binds: []string{volume.Name + ":/data"},
 	}, nil, nil, "")
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	logDuration("container creation")
 
@@ -232,7 +231,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	})
 	containerRemove(resp.ID)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	logDuration("container copy")
 
@@ -274,13 +273,13 @@ func runTest(r *http.Request) ([]byte, error) {
 		Cmd:    args,
 	}, &hostconfig, nil, nil, "")
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	logDuration("container creation")
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		containerRemove(resp.ID)
-		return nil, err
+		return nil, false, err
 	}
 	logDuration("container start")
 
@@ -293,11 +292,11 @@ func runTest(r *http.Request) ([]byte, error) {
 		if errors.Is(err, context.DeadlineExceeded) {
 			if err := cli.ContainerKill(ctx, resp.ID, "SIGKILL"); err != nil {
 				containerRemove(resp.ID)
-				return nil, err
+				return nil, false, err
 			}
 		}
 		containerRemove(resp.ID)
-		return nil, errors.New("timeout: Did you write an infinite loop? " + err.Error())
+		return nil, false, errors.New("timeout: Did you write an infinite loop? " + err.Error())
 	case status := <-statusCh:
 		ok = status.StatusCode == 0
 		if !ok && status.Error != nil {
