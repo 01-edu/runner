@@ -167,13 +167,7 @@ func Run(r *http.Request) ([]byte, bool, error) {
 			if err != nil {
 				return err
 			}
-			defer resp.Close()
-			b, err := io.ReadAll(resp)
-			if err != nil {
-				return err
-			}
-			b = bytes.ReplaceAll(b, []byte{'\r', '\n'}, []byte{'\n'})
-			os.Stderr.Write(b)
+			resp.Close()
 			return nil
 		}()
 		if err != nil {

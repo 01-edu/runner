@@ -37,7 +37,7 @@ Where `REGISTRY_PASSWORD` is the password of our private Docker [registry](https
 ### Example
 
 ```console
-$ go run ./cmd 2>/dev/null &
+$ go run ./cmd/runner 2>/dev/null &
 $ echo mydata > myfile
 $ zip archive.zip myfile
 $ curl --silent --data-binary @archive.zip 'localhost:8080/alpine?args=sh&args=-c&args=cat+student/myfile' | jq -jr .Output

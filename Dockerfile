@@ -8,12 +8,12 @@ COPY go.* ./
 RUN go mod download
 COPY cmd cmd
 COPY *.go ./
-RUN go build -o main ./cmd
+RUN go build ./cmd/runner
 
 FROM docker.01-edu.org/alpine:3.13.4
 
 RUN apk add --no-cache tzdata
 
-ENTRYPOINT ["/app/main"]
+ENTRYPOINT ["/app/runner"]
 
-COPY --from=builder /app/main /app/main
+COPY --from=builder /app/runner /app/runner
