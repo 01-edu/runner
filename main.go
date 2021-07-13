@@ -88,7 +88,7 @@ func runTest(r *http.Request) ([]byte, error) {
 	r.Body = http.MaxBytesReader(nil, r.Body, http.DefaultMaxHeaderBytes)
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, errors.New(err.Error() + " is your repository too large?")
+		return nil, errors.New(err.Error() + ": is your repository too large?")
 	}
 	bodyReader := bytes.NewReader(b)
 	zipReader, err := zip.NewReader(bodyReader, bodyReader.Size())
