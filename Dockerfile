@@ -6,8 +6,9 @@ RUN apk add --no-cache git
 WORKDIR /app
 COPY go.* ./
 RUN go mod download
+COPY cmd cmd
 COPY *.go ./
-RUN go build
+RUN go build -o main ./cmd
 
 FROM docker.01-edu.org/alpine:3.13.4
 

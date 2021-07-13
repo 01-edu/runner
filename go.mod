@@ -1,4 +1,4 @@
-module main
+module github.com/01-edu/runner
 
 go 1.16
 

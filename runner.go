@@ -311,13 +311,13 @@ func runTest(r *http.Request) ([]byte, error) {
 	})
 	if err != nil {
 		containerRemove(resp.ID)
-		return nil, err
+		return nil, false, err
 	}
 	// demux stream, see: https://docs.docker.com/engine/api/v1.41/#operation/ContainerAttach
 	var buf bytes.Buffer
 	if _, err := stdcopy.StdCopy(&buf, &buf, out); err != nil {
 		containerRemove(resp.ID)
-		return nil, err
+		return nil, false, err
 	}
 	logDuration("container logs")
 	containerRemove(resp.ID)
@@ -326,32 +326,5 @@ func runTest(r *http.Request) ([]byte, error) {
 		b = b[:http.DefaultMaxHeaderBytes]
 		b = append(b, []byte(" ... TRUNCATED")...)
 	}
-	return json.Marshal(struct {
-		Output string
-		Ok     bool
-	}{string(b), ok})
-}
-
-func handle(rw http.ResponseWriter, r *http.Request) {
-	if b, err := runTest(r); err == nil {
-		rw.Write(b)
-	} else {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(struct {
-			Output string
-			Ok     bool
-		}{err.Error(), false})
-	}
-}
-
-func main() {
-	http.HandleFunc("/", handle)
-	port := flag.String("port", "8080", "listening port")
-	flag.Parse()
-	srv := &http.Server{
-		Addr:         ":" + *port,
-		ReadTimeout:  time.Minute,
-		WriteTimeout: time.Minute,
-	}
-	expect(http.ErrServerClosed, srv.ListenAndServe())
+	return b, ok, nil
 }

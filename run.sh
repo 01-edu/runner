@@ -5,15 +5,14 @@ IFS='
 '
 cd -P "$(dirname "$0")"
 
-docker build -t test-runner .
-docker container rm --force test-runner 2>/dev/null
+docker build -t runner .
+docker container rm --force runner 2>/dev/null
 docker run \
     --detach \
-    --name test-runner \
-    --network https \
+    --name runner \
     --log-opt max-size=100m \
     --log-opt max-file=2 \
     --env REGISTRY_PASSWORD \
     --restart unless-stopped \
     --volume /var/run/docker.sock:/var/run/docker.sock:ro \
-    test-runner
+    runner
