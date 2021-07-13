@@ -64,7 +64,7 @@ var updates = struct {
 	m map[string]time.Time
 }{m: map[string]time.Time{}}
 
-func RunTest(r *http.Request) ([]byte, bool, error) {
+func Run(r *http.Request) ([]byte, bool, error) {
 	// Parse URL path, query
 	remote := strings.Split(r.Header.Get("X-Forwarded-For"), ", ")[0]
 	if remote == "" {

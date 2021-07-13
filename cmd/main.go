@@ -10,7 +10,7 @@ import (
 )
 
 func handle(rw http.ResponseWriter, r *http.Request) {
-	b, ok, err := runner.RunTest(r)
+	b, ok, err := runner.Run(r)
 	message := string(b)
 	if err != nil {
 		message = err.Error()
