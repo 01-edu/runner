@@ -153,26 +153,38 @@ func runTest(r *http.Request) ([]byte, error) {
 	// Refresh Docker image every minute
 	updates.Lock()
 	if time.Since(updates.m[image]) > time.Minute {
-		var options types.ImagePullOptions
-		if strings.HasPrefix(image, "docker.01-edu.org/") {
-			b, err := json.Marshal(types.AuthConfig{
-				Username: "root",
-				Password: os.Getenv("REGISTRY_PASSWORD"),
-			})
-			expect(nil, err)
-			options.RegistryAuth = base64.URLEncoding.EncodeToString(b)
-		}
-		resp, err := cli.ImagePull(ctx, image, options)
+		// Try to pull the image
+		err = func() error {
+			var options types.ImagePullOptions
+			if strings.HasPrefix(image, "docker.01-edu.org/") {
+				b, err := json.Marshal(types.AuthConfig{
+					Username: "root",
+					Password: os.Getenv("REGISTRY_PASSWORD"),
+				})
+				expect(nil, err)
+				options.RegistryAuth = base64.URLEncoding.EncodeToString(b)
+			}
+			resp, err := cli.ImagePull(ctx, image, options)
+			if err != nil {
+				return err
+			}
+			defer resp.Close()
+			b, err := io.ReadAll(resp)
+			if err != nil {
+				return err
+			}
+			b = bytes.ReplaceAll(b, []byte{'\r', '\n'}, []byte{'\n'})
+			os.Stderr.Write(b)
+			return nil
+		}()
 		if err != nil {
-			return nil, err
+			if _, _, err = cli.ImageInspectWithRaw(ctx, image); err != nil {
+				// The image doesn't exist
+				updates.Unlock()
+				return nil, err
+			}
+			// Pulling the image has failed but an old revision already exists
 		}
-		defer resp.Close()
-		b, err := io.ReadAll(resp)
-		if err != nil {
-			return nil, err
-		}
-		b = bytes.ReplaceAll(b, []byte{'\r', '\n'}, []byte{'\n'})
-		os.Stderr.Write(b)
 		updates.m[image] = time.Now()
 	}
 	updates.Unlock()
