@@ -46,7 +46,12 @@ func main() {
 		wg.Add(1)
 		go func() {
 			for range queue {
-				b, ok, err := run(*image, nil, flag.Args(), b)
+				b, ok, err := run(*image, []string{
+					"DOMAIN=DOMAIN",
+					"EXAM_MODE=true",
+					"EXERCISE=printalphabet",
+					"USERNAME=aeinstein",
+				}, flag.Args(), b)
 				if err != nil {
 					panic(err)
 				}
@@ -64,5 +69,5 @@ func main() {
 	}
 	close(queue)
 	wg.Wait()
-	fmt.Println("avg", (time.Since(before) / time.Duration(*total)).Round(time.Millisecond))
+	fmt.Println("avg", (time.Since(before) * time.Duration(*parallel) / time.Duration(*total)).Round(time.Millisecond))
 }
