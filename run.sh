@@ -16,5 +16,4 @@ docker run \
     --env REGISTRY_PASSWORD \
     --restart unless-stopped \
     --volume /var/run/docker.sock:/var/run/docker.sock:ro \
-    --label org.01-edu.https=test-runner.01-edu.org:8080 \
     test-runner
