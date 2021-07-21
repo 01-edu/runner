@@ -171,13 +171,14 @@ func Run(r *http.Request) ([]byte, bool, error) {
 			return nil
 		}()
 		if err != nil {
-			if _, _, err = cli.ImageInspectWithRaw(ctx, image); err != nil {
+			if _, _, err := cli.ImageInspectWithRaw(ctx, image); err != nil {
 				// The image doesn't exist
 				updates.Unlock()
 				return nil, false, err
 			}
 			// Pulling the image has failed but an old revision already exists
 		}
+		log.Println(err)
 		updates.m[image] = time.Now()
 	}
 	updates.Unlock()
