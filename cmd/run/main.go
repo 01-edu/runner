@@ -49,6 +49,7 @@ func main() {
 				b, ok, err := run(*image, []string{
 					"DOMAIN=DOMAIN",
 					"EXAM_MODE=true",
+					"EXAM_RUN_ONLY=true",
 					"EXERCISE=printalphabet",
 					"USERNAME=aeinstein",
 				}, flag.Args(), b)
