@@ -167,6 +167,7 @@ func Run(r *http.Request) ([]byte, bool, error) {
 			if err != nil {
 				return err
 			}
+			io.Copy(io.Discard, resp) // reach EOF
 			resp.Close()
 			return nil
 		}()
