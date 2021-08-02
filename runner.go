@@ -177,8 +177,8 @@ func Run(r *http.Request) ([]byte, bool, error) {
 				return nil, false, err
 			}
 			// Pulling the image has failed but an old revision already exists
+			log.Println(err)
 		}
-		log.Println(err)
 		updates.m[image] = time.Now()
 	}
 	updates.Unlock()
