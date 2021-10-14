@@ -14,5 +14,6 @@ docker run \
     --log-opt max-file=2 \
     --env REGISTRY_PASSWORD \
     --restart unless-stopped \
+    --publish 8082:8080 \
     --volume /var/run/docker.sock:/var/run/docker.sock:ro \
     runner
